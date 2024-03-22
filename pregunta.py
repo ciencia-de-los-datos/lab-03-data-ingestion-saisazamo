@@ -12,10 +12,26 @@ espacio entre palabra y palabra.
 import pandas as pd
 
 
+
 def ingest_data():
 
-    #
-    # Inserte su código aquí
-    #
+    file = "clusters_report.txt"
+    data = pd.read_fwf(file, 
+                     header=None, 
+                     widths=[9, 16, 16, 77], 
+                     names=
+                     ["cluster", "cantidad_de_palabras_clave", "porcentaje_de_palabras_clave", "principales_palabras_clave" ],
+                     ).drop(range(0,3), axis=0).ffill()
+
+    df = data.copy()
+    df = df.groupby(['cluster', 'cantidad_de_palabras_clave', 'porcentaje_de_palabras_clave'])['principales_palabras_clave'].apply(' '.join).reset_index()
+    df['porcentaje_de_palabras_clave'] = df['porcentaje_de_palabras_clave'].apply(lambda x: x.replace(',','.').strip(' %'))
+    df['principales_palabras_clave'] = df['principales_palabras_clave'].apply(lambda x: x.replace('.',''))
+    df['principales_palabras_clave'] = df['principales_palabras_clave'].apply(lambda x:' '.join(x.split()))
+    df['cluster'] = df['cluster'].astype(int)
+    df['cantidad_de_palabras_clave'] = df['cantidad_de_palabras_clave'].astype(int)
+    df['porcentaje_de_palabras_clave'] = df['porcentaje_de_palabras_clave'].astype(float)
+    df = df.sort_values(by=['cluster'], ascending=True)
 
     return df
+
